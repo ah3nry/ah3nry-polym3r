@@ -1,0 +1,115 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-work">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        background-color: #000;
+        background-image: url('/images/backgrounds/share.jpg');
+        background-repeat: no-repeat;
+        background-position: center top;
+        background-size: 250%;
+      }
+
+      span.desktop-only {
+        display: none;
+      }
+
+      .section {
+        text-align: center;
+      }
+
+      .section::before {
+        display: block;
+        margin: 0 auto;
+        content: '';
+        width: 100px;
+        border-top: 1px solid var(--app-accent-color);
+      }
+
+      @media (min-width: 768px) {
+        :host {
+          background-size: 100%;
+        }
+
+        span.desktop-only {
+          display: inline;
+        }
+
+        .section {
+          display: inline-block;
+          box-sizing: border-box;
+          vertical-align: top;
+          width: 40.5%;
+          text-align: left;
+          border-left: 1px solid var(--app-accent-color);
+          padding-left: 40px;
+        }
+
+        .section.first {
+          margin-right: 19%;
+        }
+
+        .section > h2 {
+          margin-top: 0;
+        }
+
+        .section > p {
+          margin-bottom: 0;
+        }
+
+        .section::before {
+          content: none;
+        }
+      }
+    </style>
+
+    <div class="container">
+      <div class="splash">
+        <h1>
+          Hi, I'm Andy. I design and build web applications.
+          <!--<span class="desktop-only">your Code</span>-->
+        </h1>
+      </div>
+
+      <div class="section first">
+        <h2>NASA developers:</h2>
+        <p>
+          Thanks for your interest in sharing your code! If you are a developer employed by NASA or a
+          NASA contractor and have open source code you wish to host on the NASA GitHub repository,
+          email us at <a href="mailto:opensource@lists.nasa.gov" target="_blank">opensource@lists.nasa.gov</a>.
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>Non-NASA affiliates:</h2>
+        <p>
+          We encourage
+          you to clone, fork, modify, break, and improve the code that we've released thus far.
+          We're still working out the proper methods to take user contributions to our code and
+          will provide information on how to do so as it develops.
+        </p>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    class MyWork extends Polymer.Element {
+      static get is() { return 'my-work'; }
+    }
+
+    window.customElements.define(MyWork.is, MyWork);
+  </script>
+</dom-module>

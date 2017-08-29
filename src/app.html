@@ -1,0 +1,641 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-box/app-box.html">
+<link rel="import" href="../bower_components/app-layout/app-layout.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import" href="app-icons.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="app-data.html">
+<link rel="lazy-import" href="planet.html">
+<link rel="lazy-import" href="about.html">
+<link rel="lazy-import" href="work.html">
+<link rel="lazy-import" href="doodles.html">
+<link rel="lazy-import" href="contact.html">
+<link rel="lazy-import" href="view-404.html">
+
+<dom-module id="my-app">
+    <template>
+
+        <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
+
+        <style include="shared-styles">
+            :host {
+                display: block;
+
+                --app-accent-color: #C1C6CC;
+                --app-border-style: 1px solid #CCC;
+                --app-transparent-border-style: 1px solid rgba(255, 255, 255, 0.5);
+                --app-button-border-style: 2px solid #222;
+                --app-cover-text-color: #FFF;
+                --app-nav-background-color: #222;
+                --app-nav-text-color: #FFF;
+                --app-nav-deselected-text-color: #CCC;
+                --app-nav-selected-background-color: #555;
+                --app-icon-fill: #FFF
+            }
+
+            app-header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 11;
+            }
+
+            app-header::before {
+                position: absolute;
+                content: '';
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                opacity: 0;
+                /*background-color: var(--app-nav-background-color);*/
+                background: url(random.svg);
+                transition: opacity 0.5s ease;
+            }
+
+            app-header[threshold-triggered]::before {
+                opacity: 1;
+            }
+
+            /*app-header[threshold-triggered] {
+                background: var(--app-nav-background-color);
+            }*/
+
+            paper-icon-button {
+                --paper-icon-button-ink-color: var(--app-nav-text-color);
+                width: 40px;
+            }
+
+            header,
+            .sticky-nav {
+                z-index: 10;
+                position: absolute;
+                width: 100%;
+            }
+
+            .sticky-nav {
+                /*background-color: var(--app-nav-background-color);*/
+                position: fixed;
+                top: -1px;
+                left: 0;
+                right: 0;
+                color: var(--app-nav-text-color);
+                visibility: hidden;
+                pointer-events: none;
+                transition: transform 0.3s ease-in-out, visibility 0.3s ease-in-out;
+                transform: translate3d(0, -100%, 0);
+            }
+
+            .sticky-nav[threshold-triggered] {
+                visibility: visible;
+                pointer-events: auto;
+                transform: translate3d(0, 0, 0);
+            }
+
+            .sticky-nav .sticky-nav-toolbar {
+                background: var(--app-nav-background-color) url(random.svg);
+            }
+
+            :host([page=list]) .sticky-nav .sticky-nav-center {
+                margin-right: 40px;
+            }
+
+            :host([page=list]) .sticky-nav paper-icon-button[icon=mail],
+            :host([page=list]) .sticky-nav paper-icon-button[icon=share] {
+                display: none;
+            }
+
+            .sticky-nav-menu {
+                display: none;
+            }
+
+            .sticky-nav-menu a {
+                display: block;
+                line-height: 32px;
+                font-size: 15px;
+                text-decoration: none;
+                color: var(--app-nav-deselected-text-color);
+            }
+
+            .sticky-nav-menu a.iron-selected {
+                font-weight: bold;
+                color: var(--app-nav-text-color);
+            }
+
+            .menu-button {
+                width: 28px;
+                height: 28px;
+                margin: 24px;
+                border: none;
+                background: url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cg%3E%3Cpath d=%22M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z%22 fill=%22%23FFFFFF%22%3E%3C/path%3E%3C/g%3E%3C/svg%3E) no-repeat;
+            }
+
+            .logo {
+                position: absolute;
+                top: 0;
+                right: 0;
+                margin: 16px 26px;
+            }
+
+            .tabs {
+                display: none;
+            }
+
+            iron-pages > * {
+                min-height: 100vh;
+            }
+
+            app-drawer {
+                z-index: 12;
+
+                --app-drawer-content-container: {
+                    background-color: #000;
+                }
+            }
+
+            .close-button {
+                width: 28px;
+                height: 28px;
+                margin: 24px;
+                border: none;
+                background: url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cg%3E%3Cpath d=%22M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z%22 fill=%22%23FFFFFF%22%3E%3C/path%3E%3C/g%3E%3C/svg%3E) no-repeat;
+            }
+
+            .drawer-links > a {
+                display: block;
+                margin: 14px 28px 28px;
+                font-family: 'ArcaMajora3-Bold', sans-serif;
+                text-transform: uppercase;
+                font-weight: normal;
+                letter-spacing: 6px;
+            }
+
+            .drawer-links > a:hover {
+                text-decoration: none;
+            }
+
+            .drawer-links > a.iron-selected {
+                color: #999;
+            }
+
+            svg path {
+                    fill: var(--app-icon-fill);
+                }
+
+            /* mobile */
+            @media (max-width: 767px) {
+                header {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    color: var(--app-cover-text-color);
+                }
+
+                header .logo {
+                    margin-right: 40px;
+                }
+
+                header .date-line {
+                    padding: 6px 0;
+                    border-top: var(--app-transparent-border-style);
+                    border-bottom: var(--app-transparent-border-style);
+                }
+
+                iron-icon {
+                    width: var(--iron-icon-width, 36px);
+                    height: var(--iron-icon-height, 36px);
+                }
+
+                :host([page=article]) header .logo,
+                :host([page=article]) header .date-line {
+                    visibility: hidden;
+                }
+
+                .sticky-nav .logo,
+                :host([page=article]) .sticky-nav .date-line,
+                :host([page=list]) .sticky-nav .article-headline {
+                    display: none;
+                }
+
+                /* Can't use flex because we need a fixed width to clip text overflow. */
+                :host([page=article]) .sticky-nav-center {
+                    width: calc(100% - 120px); /* 40px * 3 buttons */
+                }
+
+                /* Can't use flex because we need a fixed width to clip text overflow. */
+                :host([page=list]) .sticky-nav-center {
+                    width: calc(100% - 80px); /* 40px * 2 buttons */
+                }
+            }
+
+            /* desktop */
+            @media (min-width: 768px) {
+                .logo {
+                    margin: 35px 40px;
+                }
+
+                iron-icon {
+                    width: var(--iron-icon-width, 60px);
+                    height: var(--iron-icon-height, 60px);
+                }
+
+                .svg_planet-fill {
+                    fill: var(--app-icon-fill);
+                }
+
+                .sticky-nav-toolbar {
+                    height: auto;
+                }
+
+                .sticky-nav {
+                    height: auto;
+                }
+
+                :host([page=article]) .sticky-nav .sticky-nav-center {
+                    margin-left: 40px;
+                }
+
+                .sticky-nav .logo a {
+                    color: inherit;
+                }
+
+                .sticky-nav-logo iron-icon {
+                    width: var(--iron-icon-width, 24px);
+                    height: var(--iron-icon-height, 24px);
+                }
+
+                .sticky-nav-logo {
+                    top: 0;
+                    right: 0;
+                    margin: 10px;
+                }
+
+                .sticky-nav .date-line {
+                    padding: 4px 0 14px;
+                }
+
+                .sticky-nav .article-headline {
+                    display: none;
+                }
+
+                .sticky-nav-center {
+                    flex: 1;
+                }
+
+                .sticky-nav-menu {
+                    @apply --layout-vertical;
+                    @apply --layout-center;
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: var(--app-nav-background-color);
+                    transition: transform 0.2s ease-in-out;
+                    will-change: transform;
+                    z-index: -1;
+                    padding-top: 20px;
+                    padding-bottom: 40px;
+                }
+
+                .grid-container {
+                    -moz-column-count: 3;
+                    -moz-column-gap: 82px;
+                    column-count: 3;
+                    column-gap: 82px;
+                }
+
+                .sticky-nav[threshold-triggered] .sticky-nav-menu[shown] {
+                    transform: translate3d(0, 100%, 0);
+                }
+
+                app-toolbar {
+                    margin-bottom: 20px;
+                }
+
+                .tabs {
+                    display: block;
+                    text-align: center;
+                }
+
+                .tabs > a {
+                    position: relative;
+                    display: inline-block;
+                    padding: 14px 0;
+                    margin: 36px 20px;
+                    font-family: 'ArcaMajora3-Bold', sans-serif;
+                    text-transform: uppercase;
+                    font-weight: normal;
+                    letter-spacing: 6px;
+                }
+
+                .tabs > a::after {
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    right: 5px;
+                    content: '';
+                }
+
+                .tabs > a:hover {
+                    text-decoration: none;
+                }
+
+                .tabs > a:hover::after {
+                    border-bottom: 1px solid var(--app-accent-color);
+                }
+
+                .tabs > a.iron-selected::after {
+                    border-bottom: 1px solid #FFF;
+                }
+
+                .menu-button,
+                app-drawer {
+                    display: none;
+                }
+            }
+
+        </style>
+
+        <app-location route="{{route}}" query-params="{{queryParams}}" use-hash-as-path></app-location>
+        <app-route route="[[route]]" pattern="/:page" data="{{routeData}}"></app-route>
+
+        <!--
+        app-data provides the list of categories.
+        -->
+        <app-data
+                id="data"
+                categories="{{categories}}"
+                category-name="[[categoryName]]"
+                category="{{category}}"
+                article-id="[[articleId]]"
+                article="{{article}}"
+                loading="{{loading}}"
+                offline="[[offline]]"
+                failure="{{failure}}">
+        </app-data>
+
+        <!--<header>-->
+            <app-header reveals threshold="1">
+            <!--<app-toolbar>-->
+            <button class="menu-button" on-click="_toggleDrawer"></button>
+            <!--<div class="logo" main-title>
+                <a href="/" aria-label$="[[_computeAppHomeLabel(appTitle)]]">[[appTitle]]</a>
+            </div>-->
+            <a href="/#/" class="logo">
+                <iron-icon icon="app-icons:planet" alt="My Logo"></iron-icon>
+            </a>
+            <!--</app-toolbar>-->
+            <iron-selector class="tabs" selected="[[page]]" attr-for-selected="name">
+                <a href="/#/" name="about">About</a>
+                <a href="/#/work" name="work">Work</a>
+                <a href="/#/doodles" name="doodles">Doodles</a>
+                <a href="/#/contact" name="contact">Contact</a>
+            </iron-selector>
+        </app-header>
+        <!--</header>-->
+
+        <iron-pages
+                selected="[[page]]"
+                attr-for-selected="name"
+                fallback-selection="invalid"
+                role="main">
+            <about-me name="about" query-params="{{queryParams}}"></about-me>
+            <my-work name="work"></my-work>
+            <my-doodles name="doodles"></my-doodles>
+            <contact name="contact"></contact>
+            <view-404 name="404"></view-404>
+
+        </iron-pages>
+
+        <app-drawer id="drawer" tabindex="0" swipe-open>
+            <button class="close-button" on-click="_toggleDrawer"></button>
+            <iron-selector class="drawer-links" selected="[[page]]" attr-for-selected="name" on-click="_toggleDrawer">
+                <a href="/#/" name="about">About</a>
+                <a href="/#/work" name="work">Work</a>
+                <a href="/#/doodles" name="doodles">Doodles</a>
+                <a href="/#/contact" name="contact">Contact</a>
+            </iron-selector>
+        </app-drawer>
+
+        <!--
+      Sticky nav reveals when scrolled down on the page.
+    -->
+        <app-box role="banner" class="sticky-nav" threshold="[[_getScrollThreshold(smallScreen)]]">
+            <app-toolbar class="sticky-nav-toolbar">
+                <paper-icon-button
+                        arial-label="Main navigation"
+                        icon="[[_menuIcon(drawerOpened)]]" on-click="_toggleDrawer"></paper-icon-button>
+                <div class="sticky-nav-center">
+                    <div class="sticky-nav-logo logo">
+                        <iron-icon icon="app-icons:planet" alt="My Logo"></iron-icon>
+                    </div>
+                    <!--<div class="date-line" role="heading">
+                        <span aria-hidden="true">&nbsp; &middot; &nbsp;</span> [[_currentTime()]]
+                    </div>-->
+                    <div class="article-headline">
+                        <slot></slot>
+                    </div>
+                </div>
+            </app-toolbar>
+            <div class="sticky-nav-menu" shown$="[[drawerOpened]]">
+                <iron-selector class="grid-container" role="navigation" on-click="_toggleDrawer"
+                               selected="[[category.name]]" attr-for-selected="name">
+                    <dom-repeat items="[[categories]]" as="category" initial-count="9">
+                        <template>
+                            <a name="[[category.name]]" href="/#/[[category.name]]">[[category.title]]</a>
+                        </template>
+                    </dom-repeat>
+                </iron-selector>
+            </div>
+        </app-box>
+
+    </template>
+
+    <script>
+      class MyApp extends Polymer.Element {
+
+        static get is() {
+          return 'my-app';
+        }
+
+        static get properties() {
+          return {
+            page: {
+              type: String,
+              reflectToAttribute: true,
+              observer: '_pageChanged'
+            },
+            rootPattern: String,
+            routeData: Object,
+            subroute: String,
+            categories: Array,
+            appTitle: String,
+            smallScreen: Boolean,
+            drawerOpened: {
+              type: Boolean,
+              value: false,
+            }
+          };
+        }
+
+        static get observers() {
+          return [
+            '_routePageChanged(routeData.page)',
+            '_pageChanged(page, oldPage)'
+          ];
+        }
+
+        ready() {
+          super.ready();
+          // Custom elements polyfill safe way to indicate an element has been upgraded.
+          this.removeAttribute('unresolved');
+
+          // Chrome on iOS recomputes "vh" unit when URL bar goes off screen. Since we use "vh" unit
+          // to size the cover image and the title, those items will resize in response to the URL
+          // bar being shown or hidden. FWIW, this is not an issue in Chrome 56 on Android or iOS
+          // Safari. To workaround this on Chrome on iOS, we will use a
+          // fixed viewport height in places where normally relying on "vh" unit and replace them with
+          // custom property "--viewport-height".
+          let ua = navigator.userAgent;
+          let cMatch = navigator.userAgent.match(/Android.*Chrome[\/\s](\d+\.\d+)/);
+          if (ua.match('CriOS') || (cMatch && cMatch[0] && cMatch[1] < 56)) {
+            document.body.classList.add('fixed-viewport-height');
+          }
+
+          Polymer.RenderStatus.afterNextRender(this, () => {
+            window.addEventListener('online', (e)=>this._notifyNetworkStatus(e));
+          window.addEventListener('offline', (e)=>this._notifyNetworkStatus(e));
+          this.addEventListener('refresh-data', (e)=>this._refreshData(e));
+        });
+        }
+
+        _routePageChanged(page) {
+          Polymer.AppLayout.scroll({top: 0});
+          // Polymer 2.0 will call with `undefined` on initialization.
+          // Ignore until we are properly called with a string.
+          if (page === undefined) {
+            return;
+          }
+
+          // If no page was found in the route data, page will be an empty string.
+          // Deault to 'about' in that case.
+          this.page = page || 'about';
+
+          // Close a non-persistent drawer when the page & route are changed.
+          if (!this.$.drawer.persistent) {
+            this.$.drawer.close();
+          }
+        }
+
+        _pageChanged(page, oldPage) {
+          // Load page import on demand. Show 404 page if fails
+          var resolvedPageUrl = this.resolveUrl(page + '.html');
+          let cb = this._pageLoaded.bind(this, Boolean(oldPage));
+          Polymer.importHref(resolvedPageUrl, cb, cb, true);
+        }
+
+        _showPage404() {
+          this.page = 'view-404';
+        }
+
+        _handleInvalidPage() {
+          this.page = 'invalid';
+        }
+
+        _toggleDrawer() {
+          this.$.drawer.toggle();
+          this.drawerOpened = !this.drawerOpened;
+        }
+
+        _getScrollThreshold(smallScreen) {
+          return smallScreen ? window.innerHeight - 64 : 162;
+        }
+
+        _computeAppHomeLabel(appTitle) {
+          return appTitle + ' Home';
+        }
+
+        _currentTime() {
+          let monthNames = [
+            'January', 'February', 'March',
+            'April', 'May', 'June', 'July',
+            'August', 'September', 'October',
+            'November', 'December'
+          ];
+
+          let date = new Date();
+
+          return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+        }
+
+        _menuIcon(drawerOpened) {
+          return drawerOpened ? 'close' : 'menu';
+        }
+
+        _notifyNetworkStatus() {
+          let oldOffline = this.offline;
+          this._setOffline(!window.navigator.onLine);
+          // Show the snackbar if the user is offline when starting a new session
+          // or if the network status changed.
+          if (this.offline || (!this.offline && oldOffline === true)) {
+            if (!this._networkSnackbar) {
+              this._networkSnackbar = document.createElement('news-snackbar');
+              this.root.appendChild(this._networkSnackbar);
+            }
+            this._networkSnackbar.textContent = this.offline ?
+                'You are offline' : 'You are online';
+            this._networkSnackbar.open();
+          }
+        }
+
+        _pageLoaded(shouldResetLayout) {
+          this._ensureLazyLoaded();
+        }
+
+        _ensureLazyLoaded() {
+          // load lazy resources after render and set `loadComplete` when done.
+          if (!this.loadComplete) {
+            Polymer.RenderStatus.afterNextRender(this, () => {
+              Polymer.importHref(this.resolveUrl('lazy-resources.html'), () => {
+              this._notifyNetworkStatus();
+            this.loadComplete = true;
+
+            // Load pre-caching Service Worker
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('/service-worker.js');
+            }
+          })
+          })
+          }
+        }
+
+        _refreshData() {
+          this.$.data.refresh();
+        }
+
+      }
+
+      window.customElements.define(MyApp.is, MyApp);
+    </script>
+</dom-module>

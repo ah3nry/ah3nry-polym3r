@@ -1,0 +1,207 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-doodles">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        background-color: #0a121d;
+        background-image: url('/images/backgrounds/projects.jpg'), url('/images/backgrounds/projects-bottom.jpg'),
+        linear-gradient(0deg, #323D44, transparent 1300px);
+        background-repeat: no-repeat;
+        background-position: center top, -10vw, center bottom;
+        background-size: 250%;
+      }
+
+      a {
+        font-size: 12px;
+      }
+
+      .splash {
+        padding-bottom: 60px;
+      }
+
+      #query {
+        margin-top: 50vw;
+        width: 400px;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 6px 0 6px 30px;
+        background: url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cg%3E%3Cpath d=%22M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z%22 fill=%22%23FFFFFF%22%3E%3C/path%3E%3C/g%3E%3C/svg%3E);
+        background-repeat: no-repeat;
+        background-position: left center;
+        background-size: 24px 24px;
+        border: none;
+        border-bottom: 1px solid #FFF;
+        border-radius: 0;
+        font-size: 16px;
+        color: #FFF;
+      }
+
+      .splash,
+      .meta {
+        /* HACK(keanulee): Create stacking context so it is above iron-list and clickable. */
+        position: relative;
+        z-index: 1;
+      }
+
+      .meta {
+        margin: 0;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--app-accent-color);
+        color: var(--app-accent-color);
+        font-style: italic;
+      }
+
+      iron-list {
+        /**
+         * HACK(keanulee): iron-list needs to have padding-top so that it occupies the entire height of the
+         * scroll area.
+         */
+        margin-top: -100vw;
+        padding-top: 100vw;
+      }
+
+      .project {
+        position: relative;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--app-accent-color);
+      }
+
+      .project > h2 {
+        font-family: 'ArcaMajora3-Heavy', sans-serif;
+        letter-spacing: 2px;
+      }
+
+      .project > p.link {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .project > h2 > a {
+        display: inline-block;
+        border: 1px solid var(--app-accent-color);
+        padding: 12px;
+        color: inherit;
+        font-size: 18px;
+      }
+
+      .project > p.tags > a {
+        margin-right: 0.5em;
+      }
+
+      @media (min-width: 768px) {
+        :host {
+          background-position: center top, center 106vw, center bottom;
+          background-size: 100%;
+        }
+
+        .splash {
+          padding: 27vw 0 22vw;
+          background: url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cg%3E%3Cpath d=%22M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z%22 fill=%22%23FFFFFF%22%3E%3C/path%3E%3C/g%3E%3C/svg%3E);
+          background-repeat: no-repeat;
+          background-position: center 96%;
+          background-size: 32px 32px;
+        }
+
+        .project > span.licenses {
+          float: right;
+          margin-left: 24px;
+        }
+
+        #query {
+          margin-top: 0;
+        }
+      }
+    </style>
+
+    <div class="container">
+      <div class="splash">
+        <h1>Hi, I'm Andy. I design and build web applications.</h1>
+        <!--<input id="query" type="text" value="{{queryParams.q::input}}" title="Search Projects">-->
+      </div>
+
+      <p class="meta">
+        [[matchedProjects.length]] NASA Open Source Software [[_pluralize('Project', matchedProjects.length)]]
+        <template is="dom-if" if="[[queryParams.q]]">
+          matching "[[queryParams.q]]"
+        </template>
+        <template is="dom-if" if="[[queryParams.tag]]">
+          tagged with #[[queryParams.tag]]
+        </template>
+        <template is="dom-if" if="[[_hasQueryParams(queryParams.*)]]">
+          <a href="/#/">Show all projects</a>
+        </template>
+      </p>
+
+      <div class="section first">
+        <h2>NASA developers:</h2>
+        <p>
+          Thanks for your interest in sharing your code! If you are a developer employed by NASA or a
+          NASA contractor and have open source code you wish to host on the NASA GitHub repository,
+          email us at <a href="mailto:opensource@lists.nasa.gov" target="_blank">opensource@lists.nasa.gov</a>.
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>Non-NASA affiliates:</h2>
+        <p>
+          We encourage
+          you to clone, fork, modify, break, and improve the code that we've released thus far.
+          We're still working out the proper methods to take user contributions to our code and
+          will provide information on how to do so as it develops.
+        </p>
+      </div>
+
+      <iron-list items="[[matchedProjects]]" scroll-target="document">
+        <template>
+          <div>
+            <div class="project">
+              <h2>
+                <a href$="[[_getProperty(item, 'External Link')]]" target="_blank">
+                  [[_getProperty(item, 'Software')]]
+                </a>
+              </h2>
+              <p class="link">
+                <a href$="[[_getProperty(item, 'Public Code Repo')]]" target="_blank">
+                  [[_getProperty(item, 'Public Code Repo')]]
+                </a>
+              </p>
+              <p>[[item.Description]]</p>
+              <span class="licenses">
+                <template is="dom-repeat" items="[[item.License]]" as="license">
+                  <a href$="[[_getLicenseLink(license)]]" target="_blank">[[_getLicenseName(license)]]</a>
+                </template>
+              </span>
+              <p class="tags">
+                <template is="dom-repeat" items="[[item.Categories]]" as="tag">
+                  <a href$="/?tag=[[tag]]">#[[tag]]</a>
+                </template>
+              </p>
+            </div>
+          </div>
+        </template>
+      </iron-list>
+    </div>
+  </template>
+
+  <script>
+    class MyDoodles extends Polymer.Element {
+      static get is() { return 'my-doodles'; }
+    }
+
+    window.customElements.define(MyDoodles.is, MyDoodles);
+  </script>
+</dom-module>
